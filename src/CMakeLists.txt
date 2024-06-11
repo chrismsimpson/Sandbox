@@ -5,10 +5,16 @@ project(projConsole)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(SDL3 REQUIRED)
+find_package(PNG REQUIRED)
+
+include_directories(${SDL3_INCLUDE_DIRS})
+include_directories(${PNG_INCLUDE_DIRS})
+
 include_directories(../lib/sandbox)
 
 add_executable(console 
     main.cpp
 )
 
-target_link_libraries(console Sandbox)
+target_link_libraries(console ${SDL3_LIBRARIES} ${PNG_LIBRARIES} Sandbox)

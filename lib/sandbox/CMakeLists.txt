@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(Sandbox SHARED 
     Foo.cpp
+    sqlite3.c
+    sqlite3.h
+    sqlite3ext.h
 )
 
 set_target_properties(Sandbox PROPERTIES LINKER_LANGUAGE CXX)
