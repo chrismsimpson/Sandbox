@@ -852,10 +852,14 @@ class Game
 public:
     Game(
         int screen_width,
-        int screen_height)
+        int screen_height,
+        int size)
     {
         m_screen_width = screen_width;
         m_screen_height = screen_height;
+
+        m_size = size;
+        m_size_f = static_cast<float>(m_size);
 
         std::println("creating window");
 
@@ -910,19 +914,36 @@ public:
         }
     }
 
+    void reset_camera()
+    {
+        // m_camera = Vec4(8.0f, 9.51649f, 2.4497957f, 1.0f);
+        // m_camera = Vec4(m_size_f / 2.0f, m_size_f / 4.0f, 0.0f - (m_size_f / 16.0f), 1.0f);
+        m_camera = Vec4(m_size_f / 2.0f, m_size_f / 4.0f, m_size_f / 32.0f, 1.0f);
+        m_yaw = 0.0f;
+        m_pitch = 0.7708009f;
+        m_roll = 0.0f;
+    }
+
     void on_create()
     {
-        m_mesh = Mesh::create_from_height_map(Mesh::generate_height_map(128)); // sc2k
+        m_mesh = Mesh::create_from_height_map(Mesh::generate_height_map(m_size)); // sc2k
         // m_mesh = Mesh::create_from_height_map(Mesh::generate_height_map(256)); // sc4
 
         m_projection_matrix = Matrix4x4::make_projection(90.0f, m_height / m_width, 0.1f, 1000.0f);
 
         ///
 
-        m_camera = Vec4(8.0f, 9.51649f, 2.4497957f, 1.0f);
-        m_yaw = 0.0f;
-        m_pitch = 0.7708009f;
-        m_roll = 0.0f;
+        reset_camera();
+    }
+
+    void print_camera()
+    {
+        std::println("camera = Vec4(x: {0}f, y: {1}f, z: {2}f, w: {3}f);", m_camera.x(), m_camera.y(), m_camera.z(), m_camera.w());
+        std::println("yaw = {0}f;", m_yaw);
+        std::println("pitch = {0}f;", m_pitch);
+        std::println("roll = {0}f;", m_roll);
+        std::println("look direction = Vec4(x: {0}f, y: {1}f, z: {2}f, w: {3}f);", m_look_direction.x(), m_look_direction.y(), m_look_direction.z(), m_look_direction.w());
+        std::println("");
     }
 
     void on_update(
@@ -1049,12 +1070,13 @@ public:
 
         if (c1.x() != m_camera.x() || c1.y() != m_camera.y() || c1.z() != m_camera.z() || c1.w() != m_camera.w() || yaw_start != m_yaw || pitch_start != m_pitch || roll_start != m_roll)
         {
-            std::println("camera = Vec4(x: {0}f, y: {1}f, z: {2}f, w: {3}f);", m_camera.x(), m_camera.y(), m_camera.z(), m_camera.w());
-            std::println("yaw = {0}f;", m_yaw);
-            std::println("pitch = {0}f;", m_pitch);
-            std::println("roll = {0}f;", m_roll);
-            std::println("look direction = Vec4(x: {0}f, y: {1}f, z: {2}f, w: {3}f);", m_look_direction.x(), m_look_direction.y(), m_look_direction.z(), m_look_direction.w());
-            std::println("");
+            // std::println("camera = Vec4(x: {0}f, y: {1}f, z: {2}f, w: {3}f);", m_camera.x(), m_camera.y(), m_camera.z(), m_camera.w());
+            // std::println("yaw = {0}f;", m_yaw);
+            // std::println("pitch = {0}f;", m_pitch);
+            // std::println("roll = {0}f;", m_roll);
+            // std::println("look direction = Vec4(x: {0}f, y: {1}f, z: {2}f, w: {3}f);", m_look_direction.x(), m_look_direction.y(), m_look_direction.z(), m_look_direction.w());
+            // std::println("");
+            print_camera();
         }
 
         ///
@@ -1361,9 +1383,11 @@ private:
     SDL_Renderer *m_renderer = nullptr;
     int m_screen_width;
     int m_screen_height;
+    int m_size;
     float m_scale;
     float m_width;
     float m_height;
+    float m_size_f;
     Matrix4x4 m_projection_matrix;
     Vec4 m_camera;
     Vec4 m_look_direction;
@@ -1393,7 +1417,7 @@ int main()
     {
         // main loop
 
-        Game game(1280, 832);
+        Game game(1280, 832, 128);
 
         game.on_create();
 
@@ -1435,19 +1459,19 @@ int main()
 
                     if (event.wheel.y > 0)
                     {
-                        std::println("scroll up");
-
                         const auto c = Vec4::subtract(game.camera(), forward);
 
                         game.set_camera(Vec4(c.x(), c.y() + (8.0f * elapsed), c.z(), c.w()));
+
+                        game.print_camera();
                     }
                     else if (event.wheel.y < 0)
                     {
-                        std::println("scroll down");
-
                         const auto c = Vec4::add(game.camera(), forward);
 
                         game.set_camera(Vec4(c.x(), c.y() - (8.0f * elapsed), c.z(), c.w()));
+
+                        game.print_camera();
                     }
 
                     break;
@@ -1457,6 +1481,22 @@ int main()
                 {
                     quit = true;
 
+                    break;
+                }
+
+                case SDL_EVENT_KEY_DOWN:
+                {
+                    switch (event.key.keysym.scancode)
+                    {
+                    case SDL_SCANCODE_R:
+
+                        game.reset_camera();
+                        
+                        break;
+                    
+                    default:
+                        break;
+                    }
                     break;
                 }
 
