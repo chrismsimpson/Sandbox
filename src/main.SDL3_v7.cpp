@@ -919,10 +919,21 @@ public:
     {
         // m_camera = Vec4(8.0f, 9.51649f, 2.4497957f, 1.0f);
         // m_camera = Vec4(m_size_f / 2.0f, m_size_f / 4.0f, 0.0f - (m_size_f / 16.0f), 1.0f);
-        m_camera = Vec4(m_size_f / 2.0f, m_size_f / 4.0f, m_size_f / 32.0f, 1.0f);
+        // m_camera = Vec4(m_size_f / 2.0f, m_size_f / 4.0f, m_size_f / 32.0f, 1.0f);
+        // m_yaw = 0.0f;
+        // // m_pitch = 0.7708009f;
+        // m_pitch = 0.85f;
+        // m_roll = 0.0f;
+
+        // m_camera = Vec4(64.0f, 7.028963f, 10.614152f, 1.0f);
+        // m_yaw = 0.0f;
+        // m_pitch = 0.6240001f;
+        // m_roll = 0.0f;
+
+        // best for 48x48
+        m_camera = Vec4(24.0f, 26.66f, 1.38f, 1.0f);
         m_yaw = 0.0f;
-        // m_pitch = 0.7708009f;
-        m_pitch = 0.85f;
+        m_pitch = 0.93f;
         m_roll = 0.0f;
     }
 
@@ -961,6 +972,14 @@ public:
 
         ///
 
+        const auto height_ratio = m_camera.y() / (m_size_f / 2.0f);
+
+        const auto min_speed = 0.125f;
+
+        const auto move_speed = (height_ratio * (1.0f - min_speed) + min_speed);
+
+        ///
+
         const auto keyboard_state = SDL_GetKeyboardState(nullptr);
 
         if (keyboard_state[SDL_SCANCODE_UP])
@@ -987,7 +1006,7 @@ public:
 
         ///
 
-        const auto forward = Vec4::multiply(m_look_direction, std::exp(std::exp(m_pitch) - 1.0f) * 8.0f * elapsed);
+        const auto forward = Vec4::multiply(m_look_direction, std::exp(std::exp(m_pitch) - 1.0f) * 8.0f * elapsed * move_speed);
 
         if (keyboard_state[SDL_SCANCODE_W])
         {
@@ -1131,6 +1150,13 @@ public:
                 // {
                 //     continue;
                 // }
+
+                // if (Vec4::distance(tri_transformed.point_at(0), m_camera) > (50.0f + (m_camera.y() * 4.0f)))
+                if (Vec4::distance(tri_transformed.point_at(0), m_camera) > (75.0f + (m_camera.y() * 2.0f)))
+                {
+                    continue;
+                }
+
 
                 ///
 
@@ -1374,9 +1400,11 @@ public:
 
         SDL_RenderClear(m_renderer);
 
-        ///
+        // std::println("renderer: {}", SDL_GetRendererName(m_renderer));
 
-        m_renderer
+        
+
+        
 
         ///
 
@@ -1483,8 +1511,9 @@ int main()
     {
         // main loop
 
-        const auto game_size = 128;
+        // const auto game_size = 128;
         // const auto game_size = 64;
+        const auto game_size = 48;
 
         Game game(1280, 832, game_size);
 
